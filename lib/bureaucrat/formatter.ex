@@ -48,7 +48,20 @@ defmodule Bureaucrat.Formatter do
     Enum.group_by(records, &path_for(&1, paths, default_path))
   end
 
-  defp path_for({_, _}, _, default_path), do: default_path
+  defp path_for({_record, opts}, paths, default_path) do
+    path_module = opts[:path_module]
+
+    if path_module do
+      {_, path} = Enum.find(paths, {:default, default_path}, fn({prefix, path}) ->
+        to_string(path_module) == to_string(prefix)
+      end)
+
+      path
+    else
+      default_path
+    end
+  end
+
   defp path_for(_record, [], default_path), do: default_path
 
   defp path_for(record, [{prefix, path} | paths], default_path) do
